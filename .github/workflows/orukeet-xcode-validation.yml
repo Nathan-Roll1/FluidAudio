@@ -1,0 +1,35 @@
+name: Orukeet Xcode validation
+on:
+  push:
+    branches: [codex/orukeet-xcode-validation]
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: macos-26
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: 0e4dda395dc9ee28b28fb2be8b280dcb1e36b8ca
+      - name: Record exact source and toolchain
+        run: |
+          mkdir -p artifacts
+          git rev-parse HEAD | tee artifacts/source-head.txt
+          xcodebuild -version | tee artifacts/xcode-version.txt
+          swift --version | tee artifacts/swift-version.txt
+      - name: Build complete package with default dependencies
+        run: |
+          set -o pipefail
+          swift build 2>&1 | tee artifacts/swift-build.log
+      - name: Compile all tests and run local model loader regressions
+        run: |
+          set -o pipefail
+          swift test --filter 'AsrModelsLocalTests|AsrModelsTests' 2>&1 | tee artifacts/swift-tests.log
+      - name: Upload build evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: FluidAudio-orukeet-xcode-validation
+          path: artifacts/
+          retention-days: 14
