@@ -11,7 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
         with:
-          ref: 0e4dda395dc9ee28b28fb2be8b280dcb1e36b8ca
+          ref: 0cbec7d582882e58bb937340e8602ebaa884da48
       - name: Record exact source and toolchain
         run: |
           mkdir -p artifacts
